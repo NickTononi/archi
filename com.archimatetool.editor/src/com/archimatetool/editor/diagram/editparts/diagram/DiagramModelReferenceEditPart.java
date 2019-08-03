@@ -6,6 +6,7 @@
 package com.archimatetool.editor.diagram.editparts.diagram;
 
 import org.eclipse.draw2d.IFigure;
+import org.eclipse.emf.common.notify.Notification;
 import org.eclipse.gef.EditPolicy;
 import org.eclipse.gef.Request;
 import org.eclipse.gef.RequestConstants;
@@ -51,6 +52,11 @@ public class DiagramModelReferenceEditPart extends AbstractConnectedEditPart {
         if(ref != null) {
             ref.eAdapters().remove(getECoreAdapter());
         }
+    }
+    
+    @Override
+    protected boolean isNotificationInteresting(Notification msg) {
+        return super.isNotificationInteresting(msg) || msg.getNotifier() == ((IDiagramModelReference)getModel()).getReferencedModel();
     }
 
     @Override

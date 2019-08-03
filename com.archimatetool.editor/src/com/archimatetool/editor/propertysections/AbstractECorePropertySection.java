@@ -10,8 +10,9 @@ import java.util.List;
 
 import org.eclipse.emf.common.notify.Adapter;
 import org.eclipse.emf.common.notify.Notification;
-import org.eclipse.emf.common.notify.impl.AdapterImpl;
+import org.eclipse.emf.common.notify.Notifier;
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.util.EContentAdapter;
 import org.eclipse.gef.commands.Command;
 import org.eclipse.gef.commands.CommandStack;
 import org.eclipse.gef.commands.CompoundCommand;
@@ -28,6 +29,8 @@ import com.archimatetool.model.IAdapter;
 import com.archimatetool.model.IArchimateModel;
 import com.archimatetool.model.IArchimateModelObject;
 import com.archimatetool.model.IArchimatePackage;
+import com.archimatetool.model.IFeature;
+import com.archimatetool.model.IFeatures;
 import com.archimatetool.model.ILockable;
 
 
@@ -50,14 +53,22 @@ public abstract class AbstractECorePropertySection extends AbstractArchiProperty
     private List<EObject> fObjects;
     
     /**
-     * Default Adapter to listen to model element changes
-     * Sub-classes can return a different one if required via getECoreAdapter()
+     * We need an EContentAdapter to listen to all child IFeature objects
      */
-    private Adapter eAdapter = new AdapterImpl()  {
+    private Adapter eAdapter = new EContentAdapter()  {
         @Override
         public void notifyChanged(Notification msg) {
+            super.notifyChanged(msg);
             AbstractECorePropertySection.this.notifyChanged(msg);
         }
+        
+        @Override
+        protected void addAdapter(Notifier notifier) {
+            // Only interested in these ones
+            if(notifier instanceof IFeature) {
+                super.addAdapter(notifier);
+            }
+        };
     };
     
     @Override
@@ -197,6 +208,31 @@ public abstract class AbstractECorePropertySection extends AbstractArchiProperty
      */
     protected Adapter getECoreAdapter() {
         return eAdapter;
+    }
+    
+    /**
+     * Return true if the message notification is a feature with the given name
+     */
+    protected boolean isFeatureNotification(Notification msg, String name) {
+        if(!(getFirstSelectedObject() instanceof IFeatures)) {
+            return false;
+        }
+        
+        EObject notifier = (EObject)msg.getNotifier();
+        IFeatures features = (IFeatures)getFirstSelectedObject();
+        
+        // Feature added
+        if(msg.getFeature() == IArchimatePackage.Literals.FEATURES__FEATURES
+                && msg.getNewValue() instanceof IFeature) {
+            return name.equals(((IFeature)msg.getNewValue()).getName());
+        }
+        
+        // Todo: Feature Removed
+        
+        // Feature value of feature changed
+        return msg.getFeature() == IArchimatePackage.Literals.FEATURE__VALUE
+            && features.getFeatures().contains(notifier)
+            && name.equals(((IFeature)notifier).getName());
     }
     
     /**

@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.emf.common.notify.Adapter;
+import org.eclipse.emf.common.notify.Notification;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.gef.editparts.AbstractGraphicalEditPart;
 import org.eclipse.jface.util.IPropertyChangeListener;
@@ -18,6 +19,7 @@ import org.eclipse.jface.util.PropertyChangeEvent;
 import com.archimatetool.editor.preferences.Preferences;
 import com.archimatetool.model.IDiagramModelContainer;
 import com.archimatetool.model.IDiagramModelObject;
+import com.archimatetool.model.IFeature;
 
 
 
@@ -90,6 +92,14 @@ public abstract class AbstractFilteredEditPart extends AbstractGraphicalEditPart
      */
     protected abstract Adapter getECoreAdapter();
 
+    /**
+     * Filter messages
+     */
+    protected boolean isNotificationInteresting(Notification msg) {
+        return msg.getNotifier() == getModel()
+                || (msg.getNotifier() instanceof IFeature && ((EObject)msg.getNotifier()).eContainer() == getModel());
+    }
+    
     @Override
     public EObject getModel() {
         return (EObject)super.getModel();

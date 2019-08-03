@@ -11,7 +11,7 @@ import java.util.List;
 import org.eclipse.draw2d.ConnectionAnchor;
 import org.eclipse.emf.common.notify.Adapter;
 import org.eclipse.emf.common.notify.Notification;
-import org.eclipse.emf.common.notify.impl.AdapterImpl;
+import org.eclipse.emf.ecore.util.EContentAdapter;
 import org.eclipse.gef.ConnectionEditPart;
 import org.eclipse.gef.EditPart;
 import org.eclipse.gef.NodeEditPart;
@@ -22,6 +22,7 @@ import com.archimatetool.editor.preferences.IPreferenceConstants;
 import com.archimatetool.editor.preferences.Preferences;
 import com.archimatetool.model.IArchimatePackage;
 import com.archimatetool.model.IDiagramModelConnection;
+import com.archimatetool.model.IFeature;
 
 
 /**
@@ -40,9 +41,10 @@ implements NodeEditPart {
         super(figureClass);
     }
 
-    private Adapter adapter = new AdapterImpl() {
+    private Adapter adapter = new EContentAdapter() {
         @Override
         public void notifyChanged(Notification msg) {
+            super.notifyChanged(msg);
             eCoreChanged(msg);
         }
     };
@@ -52,7 +54,17 @@ implements NodeEditPart {
      * @param msg
      */
     protected void eCoreChanged(Notification msg) {
+        if(!isNotificationInteresting(msg)) {
+            return;
+        }
+        
         Object feature = msg.getFeature();
+        
+        // Archi Features
+        if(feature == IArchimatePackage.Literals.FEATURES__FEATURES || msg.getNotifier() instanceof IFeature) {
+            refreshFigure();
+            return;
+        }
 
         switch(msg.getEventType()) {
             // Children added or removed or moved

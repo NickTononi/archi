@@ -18,8 +18,9 @@ import org.eclipse.draw2d.RelativeBendpoint;
 import org.eclipse.draw2d.geometry.Dimension;
 import org.eclipse.emf.common.notify.Adapter;
 import org.eclipse.emf.common.notify.Notification;
-import org.eclipse.emf.common.notify.impl.AdapterImpl;
 import org.eclipse.emf.common.util.EList;
+import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.util.EContentAdapter;
 import org.eclipse.gef.EditPart;
 import org.eclipse.gef.EditPolicy;
 import org.eclipse.gef.GraphicalViewer;
@@ -50,6 +51,7 @@ import com.archimatetool.editor.ui.services.ViewManager;
 import com.archimatetool.model.IArchimatePackage;
 import com.archimatetool.model.IDiagramModelBendpoint;
 import com.archimatetool.model.IDiagramModelConnection;
+import com.archimatetool.model.IFeature;
 import com.archimatetool.model.ILockable;
 
 
@@ -61,9 +63,10 @@ import com.archimatetool.model.ILockable;
  */
 public class DiagramConnectionEditPart extends AbstractConnectionEditPart {
 
-    private Adapter adapter = new AdapterImpl() {
+    private Adapter adapter = new EContentAdapter() {
         @Override
         public void notifyChanged(Notification msg) {
+            super.notifyChanged(msg);
             eCoreChanged(msg);
         }
     };
@@ -134,6 +137,10 @@ public class DiagramConnectionEditPart extends AbstractConnectionEditPart {
     }
 
     protected void eCoreChanged(Notification msg) {
+        if(!isNotificationInteresting(msg)) {
+            return;
+        }
+
         Object feature = msg.getFeature();
         
         switch(msg.getEventType()) {
@@ -156,6 +163,11 @@ public class DiagramConnectionEditPart extends AbstractConnectionEditPart {
         }
     }
     
+    protected boolean isNotificationInteresting(Notification msg) {
+        return msg.getNotifier() == getModel()
+                || (msg.getNotifier() instanceof IFeature && ((EObject)msg.getNotifier()).eContainer() == getModel());
+    }
+
     protected Adapter getECoreAdapter() {
         return adapter;
     }

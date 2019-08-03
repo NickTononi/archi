@@ -38,6 +38,10 @@ implements NodeEditPart {
 
     @Override
     protected void eCoreChanged(Notification msg) {
+        if(!isNotificationInteresting(msg)) {
+            return;
+        }
+
         Object feature = msg.getFeature();
         
         switch(msg.getEventType()) {
@@ -59,6 +63,11 @@ implements NodeEditPart {
         super.eCoreChanged(msg);
     }
     
+    @Override
+    protected boolean isNotificationInteresting(Notification msg) {
+        return super.isNotificationInteresting(msg) || msg.getNotifier() == getModel().getArchimateConcept();
+    }
+
     @Override
     protected void applicationPreferencesChanged(PropertyChangeEvent event) {
         // Hidden connections
