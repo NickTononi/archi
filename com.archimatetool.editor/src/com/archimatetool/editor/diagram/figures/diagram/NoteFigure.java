@@ -108,7 +108,9 @@ public class NoteFigure extends AbstractDiagramModelObjectFigure {
         // Fill
         PointList points = new PointList();
         
-        if(getDiagramModelObject().getBorderType() == IDiagramModelNote.BORDER_DOGEAR) {
+        int type = getDiagramModelObject().getFeatures().getInt("borderType", IDiagramModelNote.BORDER_DOGEAR);
+        
+        if(type == IDiagramModelNote.BORDER_DOGEAR) {
             points.addPoint(bounds.x, bounds.y);
             points.addPoint(bounds.getTopRight().x - 1, bounds.y);
             points.addPoint(bounds.getTopRight().x - 1, bounds.getBottomRight().y - 13);
@@ -138,7 +140,7 @@ public class NoteFigure extends AbstractDiagramModelObjectFigure {
             gradient.dispose();
         }
 
-        if(getDiagramModelObject().getBorderType() != IDiagramModelNote.BORDER_NONE) {
+        if(type != IDiagramModelNote.BORDER_NONE) {
             graphics.setForegroundColor(getLineColor());
             graphics.drawPolygon(points);
         }

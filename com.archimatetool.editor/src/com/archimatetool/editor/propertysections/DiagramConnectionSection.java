@@ -13,14 +13,17 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.PlatformUI;
 
 import com.archimatetool.editor.diagram.commands.ConnectionTextPositionCommand;
 import com.archimatetool.editor.diagram.commands.LineWidthCommand;
+import com.archimatetool.editor.model.commands.FeatureCommand;
 import com.archimatetool.model.IArchimatePackage;
 import com.archimatetool.model.IDiagramModelConnection;
+import com.archimatetool.model.IFeatures;
 import com.archimatetool.model.ILineObject;
 
 
@@ -51,6 +54,7 @@ public class DiagramConnectionSection extends AbstractECorePropertySection {
 
     private Combo fComboTextPosition;
     private Combo fComboLineWidth;
+    private Button fButtonDisplayName;
     
     public static final String[] comboTextPositionItems = {
             Messages.DiagramConnectionSection_0,
@@ -68,6 +72,7 @@ public class DiagramConnectionSection extends AbstractECorePropertySection {
     protected void createControls(Composite parent) {
         createTextPositionComboControl(parent);
         createLineWidthComboControl(parent);
+        createDisplayNameControl(parent);
         
         // Help ID
         PlatformUI.getWorkbench().getHelpSystem().setHelp(parent, HELP_ID);
@@ -127,6 +132,31 @@ public class DiagramConnectionSection extends AbstractECorePropertySection {
         });
     }
     
+    private void createDisplayNameControl(Composite parent) {
+        createLabel(parent, "Show Text", ITabbedLayoutConstants.STANDARD_LABEL_WIDTH, SWT.CENTER);
+        
+        fButtonDisplayName = new Button(parent, SWT.CHECK);
+        
+        fButtonDisplayName.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                CompoundCommand result = new CompoundCommand();
+
+                for(EObject connection : getEObjects()) {
+                    if(isAlive(connection)) {
+                        Command cmd = new FeatureCommand("Show Text", (IFeatures)connection,
+                                "name_visible", fButtonDisplayName.getSelection(), true);
+                        if(cmd.canExecute()) {
+                            result.add(cmd);
+                        }
+                    }
+                }
+
+                executeCommand(result.unwrap());
+            }
+        });
+    }
+    
     @Override
     protected void notifyChanged(Notification msg) {
         if(msg.getNotifier() == getFirstSelectedObject()) {
@@ -142,12 +172,18 @@ public class DiagramConnectionSection extends AbstractECorePropertySection {
                 update();
             }
         }
+        
+        // Notifier is the Feature
+        if(isFeatureNotification(msg, "name_visible")) {
+            refreshNameVisibleButton();
+        }
     }
 
     @Override
     protected void update() {
         refreshTextPositionCombo();
         refreshLineWidthCombo();
+        refreshNameVisibleButton();
     }
     
     protected void refreshTextPositionCombo() {
@@ -174,6 +210,19 @@ public class DiagramConnectionSection extends AbstractECorePropertySection {
         fComboLineWidth.select(lineWidth - 1);
         
         fComboLineWidth.setEnabled(!isLocked(lastSelectedConnection));
+    }
+    
+    protected void refreshNameVisibleButton() {
+        if(fIsExecutingCommand) {
+            return; 
+        }
+        
+        IDiagramModelConnection lastSelectedConnection = (IDiagramModelConnection)getFirstSelectedObject();
+        
+        boolean enabled = lastSelectedConnection.getFeatures().getBoolean("name_visible", true);
+        fButtonDisplayName.setSelection(enabled);
+        
+        fButtonDisplayName.setEnabled(!isLocked(lastSelectedConnection));
     }
     
     @Override

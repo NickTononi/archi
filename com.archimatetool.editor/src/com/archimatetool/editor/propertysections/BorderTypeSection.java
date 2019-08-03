@@ -16,9 +16,9 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.PlatformUI;
 
-import com.archimatetool.editor.model.commands.EObjectFeatureCommand;
+import com.archimatetool.editor.model.commands.FeatureCommand;
 import com.archimatetool.model.IArchimatePackage;
-import com.archimatetool.model.IBorderType;
+import com.archimatetool.model.IFeatures;
 
 
 /**
@@ -47,8 +47,8 @@ public abstract class BorderTypeSection extends AbstractECorePropertySection {
 
                 for(EObject eObject : getEObjects()) {
                     if(isAlive(eObject)) {
-                        Command cmd = new EObjectFeatureCommand(Messages.BorderTypeSection_1, eObject,
-                                IArchimatePackage.Literals.BORDER_TYPE__BORDER_TYPE, fComboBorderType.getSelectionIndex());
+                        Command cmd = new FeatureCommand("Border Type", (IFeatures)eObject, //$NON-NLS-1$ 
+                                "borderType", fComboBorderType.getSelectionIndex(), 0);
                         if(cmd.canExecute()) {
                             result.add(cmd);
                         }
@@ -65,16 +65,17 @@ public abstract class BorderTypeSection extends AbstractECorePropertySection {
 
     @Override
     protected void notifyChanged(Notification msg) {
+        if(isFeatureNotification(msg, "borderType")) {
+            update();
+        }
+        
         if(msg.getNotifier() == getFirstSelectedObject()) {
-            Object feature = msg.getFeature();
-            
-            if(feature == IArchimatePackage.Literals.BORDER_TYPE__BORDER_TYPE ||
-                    feature == IArchimatePackage.Literals.LOCKABLE__LOCKED) {
+            if(msg.getFeature() == IArchimatePackage.Literals.LOCKABLE__LOCKED) {
                 update();
             }
         }
     }
-
+    
     @Override
     protected void update() {
         if(fIsExecutingCommand) {
@@ -82,7 +83,9 @@ public abstract class BorderTypeSection extends AbstractECorePropertySection {
         }
         
         fComboBorderType.setItems(getComboItems());
-        fComboBorderType.select(((IBorderType)getFirstSelectedObject()).getBorderType());
+        
+        int type = ((IFeatures)getFirstSelectedObject()).getFeatures().getInt("borderType", 0);
+        fComboBorderType.select(type);
         fComboBorderType.setEnabled(!isLocked(getFirstSelectedObject()));
     }
     

@@ -45,7 +45,9 @@ public class InfluenceConnectionFigure extends AbstractArchimateConnectionFigure
         if(StringUtils.isSet(rel.getStrength())) {
             text += " " + rel.getStrength(); //$NON-NLS-1$
         }
-        getConnectionLabel().setText(text);
+        
+        boolean displayName = getModelConnection().getFeatures().getBoolean("name_visible", true);
+        getConnectionLabel().setText(displayName ? text : "");
     }
     
     @Override

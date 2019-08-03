@@ -59,7 +59,9 @@ public class GroupFigure extends AbstractTextControlContainerFigure {
         int[] topRectangle = null;
         int[] mainRectangle = null;
         
-        if(getDiagramModelObject().getBorderType() == IDiagramModelGroup.BORDER_TABBED) {
+        int type = getDiagramModelObject().getFeatures().getInt("borderType", IDiagramModelGroup.BORDER_TABBED);
+        
+        if(type == IDiagramModelGroup.BORDER_TABBED) {
             topRectangle = new int[] {
                     bounds.x, bounds.y,
                     (int)(bounds.x + (bounds.width / INSET) - 1), bounds.y,
