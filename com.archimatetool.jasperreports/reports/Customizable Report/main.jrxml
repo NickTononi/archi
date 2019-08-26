@@ -29,6 +29,7 @@
 	<parameter name="properties_report" class="net.sf.jasperreports.engine.JasperReport"/>
 	<parameter name="diagram_object_report" class="net.sf.jasperreports.engine.JasperReport"/>
 	<parameter name="elements_report" class="net.sf.jasperreports.engine.JasperReport"/>
+	<parameter name="viewrelations_report" class="net.sf.jasperreports.engine.JasperReport"/>
 	<parameter name="DATE_NOW" class="java.lang.String">
 		<defaultValueExpression><![CDATA[(new java.text.SimpleDateFormat("d MMM yyyy HH:mm:ss")).format(new java.util.Date())]]></defaultValueExpression>
 	</parameter>
@@ -256,6 +257,9 @@
 				</subreportParameter>
 				<subreportParameter name="elements_report">
 					<subreportParameterExpression><![CDATA[$P{elements_report}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="viewrelations_report">
+					<subreportParameterExpression><![CDATA[$P{viewrelations_report}]]></subreportParameterExpression>
 				</subreportParameter>
 				<subreportParameter name="REPORT_TAG">
 					<subreportParameterExpression><![CDATA[$V{REPORT_TAG}]]></subreportParameterExpression>

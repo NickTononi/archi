@@ -19,6 +19,7 @@
 		<defaultValueExpression><![CDATA[""]]></defaultValueExpression>
 	</parameter>
 	<parameter name="elements_report" class="net.sf.jasperreports.engine.JasperReport"/>
+	<parameter name="viewrelations_report" class="net.sf.jasperreports.engine.JasperReport"/>
 	<parameter name="REPORT_PATH" class="java.lang.String"/>
 	<parameter name="REPORT_TAG" class="java.lang.String">
 		<defaultValueExpression><![CDATA[""]]></defaultValueExpression>
@@ -170,7 +171,7 @@
 				</jr:list>
 			</componentElement>
 		</band>
-		<band height="120">
+		<band height="170">
 			<printWhenExpression><![CDATA[!$V{VIEW_HIDE}.equals("true")
 && ($P{REPORT_TAG}.equals("")
     || ("~"+$V{VIEW_TAGS}+"~").toLowerCase().contains("~"+$P{REPORT_TAG}.toLowerCase()+"~")
@@ -209,6 +210,23 @@
 				</subreportParameter>
 				<dataSourceExpression><![CDATA[((com.archimatetool.jasperreports.data.ViewModelDataSource)$P{REPORT_DATA_SOURCE}).getChildElementsDataSource()]]></dataSourceExpression>
 				<subreportExpression><![CDATA[$P{elements_report}]]></subreportExpression>
+			</subreport>
+			<subreport>
+				<reportElement positionType="Float" isPrintRepeatedValues="false" x="0" y="120" width="515" height="50" isRemoveLineWhenBlank="true"/>
+				<subreportParameter name="VIEW_DETAILED">
+					<subreportParameterExpression><![CDATA[$V{VIEW_DETAILED}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="REPORT_PATH">
+					<subreportParameterExpression><![CDATA[$P{REPORT_PATH}]]></subreportParameterExpression>
+				</subreportParameter>
+                <subreportParameter name="REPORT_RESOURCE_BUNDLE">
+                    <subreportParameterExpression><![CDATA[$P{REPORT_RESOURCE_BUNDLE}]]></subreportParameterExpression>
+                </subreportParameter>
+				<subreportParameter name="TITLE">
+					<subreportParameterExpression><![CDATA["View Relations"]]></subreportParameterExpression>
+				</subreportParameter>
+				<dataSourceExpression><![CDATA[((com.archimatetool.jasperreports.data.ViewModelDataSource)$P{REPORT_DATA_SOURCE}).getChildRelationsDataSource()]]></dataSourceExpression>
+				<subreportExpression><![CDATA[$P{viewrelations_report}]]></subreportExpression>
 			</subreport>
 		</band>
 	</detail>
